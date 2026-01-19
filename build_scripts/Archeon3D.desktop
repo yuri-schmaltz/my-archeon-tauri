@@ -1,0 +1,16 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Archeon 3D
+Comment=High-fidelity Text-to-3D Generator
+Exec=/home/yurix/Documentos/my-archeon-tauri/dist/Archeon3D/Archeon3D
+Icon=/home/yurix/Documentos/my-archeon-tauri/docs/source/_static/favicon.png
+Terminal=true
+Categories=Graphics;3DGraphics;Science;AI;
+Keywords=3D;Generative;AI;Hunyuan;
+StartupNotify=true
+Actions=NewWindow;
+
+[Desktop Action NewWindow]
+Name=New Window
+Exec=/home/yurix/Documentos/my-archeon-tauri/dist/Archeon3D/Archeon3D

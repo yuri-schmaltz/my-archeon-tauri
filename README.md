@@ -150,7 +150,9 @@ Archeon 3D 2.0 supports MacOS, Windows, Linux. You may follow the next steps to 
 
 - [Code](#code-usage)
 - [Gradio App](#gradio-app)
+- [Linux Native Build](#linux-native-build)
 - [API Server](#api-server)
+
 - [Docker Usage](docs/DOCKER.md)
 - [Blender Addon](#blender-addon)
 - [Official Site](#official-site)
@@ -202,10 +204,26 @@ python3 my_hunyuan_3d.py
 ```
 
 #### New Pro Features (v2.0)
-- **Unified Interface**: Full-screen, responsive layout with optimized density.
+- **Unified Interface**: Full-screen, responsive layout with optimized density and "Pixel-Perfect" fit.
 - **Stop Generation**: Immediately cancel generation tasks with the Red Stop Button.
 - **Smart Tabs**: Auto-switching prompts based on model category (Multi-view/Normal).
 - **Progress Feedback**: Granular, thread-safe progress bars.
+
+
+### Linux Native Build
+
+You can build a standalone executable for Linux (Ubuntu/Fedora/Arch) using our included build scripts:
+
+```bash
+# Build the standalone binary (dist/Archeon3D/Archeon3D)
+bash build_scripts/build_linux.sh
+
+# Install desktop shortcut (optional)
+cp build_scripts/Archeon3D.desktop ~/.local/share/applications/
+```
+- **Session Persistence**: Automatically saves your last used settings (Seed, Steps, Guidance) so you can pick up where you left off.
+- **Linux Native**: Full support for Linux AppImage and native builds with `.desktop` integration.
+
 
 
 ### API Server

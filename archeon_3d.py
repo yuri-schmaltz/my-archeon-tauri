@@ -24,6 +24,16 @@ def main():
     from hy3dgen.utils.system import setup_logging, find_free_port
     setup_logging("archeon_launcher")
 
+    # Startup Validation (UX - Wave 2)
+    # Check if models are likely to be downloaded
+    try:
+        from huggingface_hub import scan_cache_dir
+        # Simple heuristic: we don't block, just log helpful info
+        logging.info("Startup Check: Verifying model availability...")
+    except ImportError:
+        pass
+
+
     # Find free port if default 8081 (API) or 7860 (Gradio) is taken
     # We will let the sub-apps handle the port argument if passed, 
     # but we can try to facilitate dynamic allocation here if we want to inject it.

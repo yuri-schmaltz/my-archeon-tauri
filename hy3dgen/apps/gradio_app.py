@@ -223,6 +223,22 @@ async def unified_generation(model_key, caption, negative_prompt, image, mv_imag
     
     logger.info("ACTION: Generation Request Submitted")
     
+    # Save Config (Persistence Step)
+    try:
+        from hy3dgen.utils.config import save_config
+        save_config({
+            'num_inference_steps': int(steps),
+            'guidance_scale': float(guidance_scale),
+            'seed': int(seed),
+            'octree_resolution': int(octree_resolution),
+            'do_rembg': check_box_rembg,
+            'num_chunks': int(num_chunks),
+            'tex_steps': int(tex_steps),
+            'tex_guidance_scale': float(tex_guidance_scale)
+        })
+    except Exception as e:
+        logger.warning(f"Failed to auto-save config: {e}")
+    
     # Run generation in background task
     task = asyncio.create_task(request_manager.submit(params))
     start_time = time.time()
@@ -349,6 +365,19 @@ def build_app(example_is=None, example_ts=None, example_mvs=None):
         # State to track current model mode based on tab
         model_key_state = gr.State("Normal")
 
+        # Load Persistent Config
+        from hy3dgen.utils.config import get_setting, update_setting
+        
+        # Defaults
+        def_res = get_setting('octree_resolution', 256)
+        def_chunks = get_setting('num_chunks', 8000)
+        def_rembg = get_setting('do_rembg', True)
+        def_steps = get_setting('num_inference_steps', 50)
+        def_cfg = get_setting('guidance_scale', 5.0)
+        def_tex_steps = get_setting('tex_steps', 30)
+        def_tex_cfg = get_setting('tex_guidance_scale', 5.0)
+        def_seed = get_setting('seed', 1234)
+
         with gr.Row(elem_classes="main-row"):
             with gr.Column(scale=1, elem_classes="left-col"):
                 
@@ -357,15 +386,15 @@ def build_app(example_is=None, example_ts=None, example_mvs=None):
                     with gr.Tabs(selected='tab_img_prompt') as tabs_prompt:
                         with gr.Tab(i18n.get('tab_img_prompt'), id='tab_img_prompt') as tab_ip:
                             with gr.Column(elem_classes="prompt-container"):
-                                image = gr.Image(label=i18n.get('lbl_image'), type='pil', image_mode='RGBA', height=300, sources=['upload', 'clipboard'])
+                                image = gr.Image(label=i18n.get('lbl_image'), type='pil', image_mode='RGBA', sources=['upload', 'clipboard'])
                         
                         with gr.Tab(i18n.get('tab_mv_prompt'), id='tab_mv_prompt') as tab_mv_p:
                             with gr.Column(elem_classes="prompt-container"):
                                 with gr.Row(variant='compact'):
-                                    mv_image_front = gr.Image(label=i18n.get('lbl_front'), type='pil', image_mode='RGBA', height=300, sources=['upload', 'clipboard'])
-                                    mv_image_left = gr.Image(label=i18n.get('lbl_left'), type='pil', image_mode='RGBA', height=300, sources=['upload', 'clipboard'])
-                                    mv_image_back = gr.Image(label=i18n.get('lbl_back'), type='pil', image_mode='RGBA', height=300, sources=['upload', 'clipboard'])
-                                    mv_image_right = gr.Image(label=i18n.get('lbl_right'), type='pil', image_mode='RGBA', height=300, sources=['upload', 'clipboard'])
+                                    mv_image_front = gr.Image(label=i18n.get('lbl_front'), type='pil', image_mode='RGBA', sources=['upload', 'clipboard'])
+                                    mv_image_left = gr.Image(label=i18n.get('lbl_left'), type='pil', image_mode='RGBA', sources=['upload', 'clipboard'])
+                                    mv_image_back = gr.Image(label=i18n.get('lbl_back'), type='pil', image_mode='RGBA', sources=['upload', 'clipboard'])
+                                    mv_image_right = gr.Image(label=i18n.get('lbl_right'), type='pil', image_mode='RGBA', sources=['upload', 'clipboard'])
 
                         with gr.Tab(i18n.get('tab_text_prompt'), id='tab_txt_prompt', visible=HAS_T2I) as tab_tp:
                             with gr.Column(elem_classes="prompt-container"):
@@ -381,25 +410,25 @@ def build_app(example_is=None, example_ts=None, example_mvs=None):
                         with gr.Tab("Advanced"):
                             with gr.Group():
                                 with gr.Row():
-                                    check_box_rembg = gr.Checkbox(value=True, label=i18n.get('lbl_rembg'))
+                                    check_box_rembg = gr.Checkbox(value=def_rembg, label=i18n.get('lbl_rembg'))
                                     randomize_seed = gr.Checkbox(label="Randomize seed", value=True)
-                                seed = gr.Slider(label=i18n.get('lbl_seed'), minimum=0, maximum=MAX_SEED, step=1, value=1234)
+                                seed = gr.Slider(label=i18n.get('lbl_seed'), minimum=0, maximum=MAX_SEED, step=1, value=def_seed)
                                 with gr.Row():
-                                    octree_resolution = gr.Slider(maximum=512, minimum=16, value=256, label=i18n.get('lbl_octree'), info="Higher = sharper geometry, more VRAM.")
-                                    num_chunks = gr.Slider(maximum=5000000, minimum=1000, value=8000, label=i18n.get('lbl_chunks'), info="Memory management for large meshes.")
+                                    octree_resolution = gr.Slider(maximum=512, minimum=16, value=def_res, label=i18n.get('lbl_octree'), info="Higher = sharper geometry, more VRAM.")
+                                    num_chunks = gr.Slider(maximum=5000000, minimum=1000, value=def_chunks, label=i18n.get('lbl_chunks'), info="Memory management for large meshes.")
                                     
                         with gr.Tab("Texture"):
                              with gr.Group():
                                 with gr.Row():
-                                    tex_steps = gr.Slider(maximum=100, minimum=1, value=30, step=1, label='Steps', info="Texture refinement steps.")
-                                    tex_guidance_scale = gr.Number(value=5.0, label='Guidance', info="Texture prompt adherence.")
-                                tex_seed = gr.Slider(label="Texture Seed", minimum=0, maximum=MAX_SEED, step=1, value=1234)
+                                    tex_steps = gr.Slider(maximum=100, minimum=1, value=def_tex_steps, step=1, label='Steps', info="Texture refinement steps.")
+                                    tex_guidance_scale = gr.Number(value=def_tex_cfg, label='Guidance', info="Texture prompt adherence.")
+                                tex_seed = gr.Slider(label="Texture Seed", minimum=0, maximum=MAX_SEED, step=1, value=def_seed)
 
                 # Exposed Critical Parameters (Moved to Footer)
                 with gr.Group(elem_classes="footer-area"):
                    with gr.Row():
-                       num_steps = gr.Slider(maximum=100, minimum=1, value=50, step=1, label=i18n.get('lbl_steps'), info=i18n.get('info_steps'))
-                       cfg_scale = gr.Number(value=5.0, label=i18n.get('lbl_guidance'), info="Prompt strictness")
+                       num_steps = gr.Slider(maximum=100, minimum=1, value=def_steps, step=1, label=i18n.get('lbl_steps'), info=i18n.get('info_steps'))
+                       cfg_scale = gr.Number(value=def_cfg, label=i18n.get('lbl_guidance'), info="Prompt strictness")
             
             # Left Column Ends Here
 
