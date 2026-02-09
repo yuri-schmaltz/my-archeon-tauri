@@ -386,7 +386,7 @@ def build_app(example_is=None, example_ts=None, example_mvs=None):
                     with gr.Tabs(selected='tab_img_prompt') as tabs_prompt:
                         with gr.Tab(i18n.get('tab_img_prompt'), id='tab_img_prompt') as tab_ip:
                             with gr.Column(elem_classes="prompt-container"):
-                                image = gr.Image(label=i18n.get('lbl_image'), type='pil', image_mode='RGBA', sources=['upload', 'clipboard'])
+                                 image = gr.Image(label=i18n.get('lbl_image'), type='pil', image_mode='RGBA', sources=['upload', 'clipboard'], height=400)
                         
                         with gr.Tab(i18n.get('tab_mv_prompt'), id='tab_mv_prompt') as tab_mv_p:
                             with gr.Column(elem_classes="prompt-container"):
@@ -401,28 +401,30 @@ def build_app(example_is=None, example_ts=None, example_mvs=None):
                                 caption = gr.Textbox(label=i18n.get('tab_text_prompt'), placeholder=i18n.get('ph_text_prompt'), lines=5, max_lines=5)
                                 negative_prompt = gr.Textbox(label='Negative Prompt', placeholder=i18n.get('ph_negative_prompt'), lines=4, max_lines=4)
 
-                with gr.Column(visible=True, elem_classes="panel-container") as gen_settings_container:
-                    with gr.Tabs(selected='tab_options' if TURBO_MODE else 'tab_export'):
-                        with gr.Tab("Quality", id='tab_options', visible=TURBO_MODE):
-                            gen_mode = gr.Radio(label=i18n.get('lbl_gen_mode'), choices=['Turbo', 'Fast', 'Standard'], value='Turbo')
-                            decode_mode = gr.Radio(label='Decoding Mode', choices=['Low', 'Standard', 'High'], value='Standard')
                         
-                        with gr.Tab("Advanced"):
-                            with gr.Group():
-                                with gr.Row():
-                                    check_box_rembg = gr.Checkbox(value=def_rembg, label=i18n.get('lbl_rembg'))
-                                    randomize_seed = gr.Checkbox(label="Randomize seed", value=True)
-                                seed = gr.Slider(label=i18n.get('lbl_seed'), minimum=0, maximum=MAX_SEED, step=1, value=def_seed)
-                                with gr.Row():
-                                    octree_resolution = gr.Slider(maximum=512, minimum=16, value=def_res, label=i18n.get('lbl_octree'), info="Higher = sharper geometry, more VRAM.")
-                                    num_chunks = gr.Slider(maximum=5000000, minimum=1000, value=def_chunks, label=i18n.get('lbl_chunks'), info="Memory management for large meshes.")
-                                    
-                        with gr.Tab("Texture"):
-                             with gr.Group():
-                                with gr.Row():
-                                    tex_steps = gr.Slider(maximum=100, minimum=1, value=def_tex_steps, step=1, label='Steps', info="Texture refinement steps.")
-                                    tex_guidance_scale = gr.Number(value=def_tex_cfg, label='Guidance', info="Texture prompt adherence.")
-                                tex_seed = gr.Slider(label="Texture Seed", minimum=0, maximum=MAX_SEED, step=1, value=def_seed)
+                        # Settings now inside scroll area group
+                        with gr.Column(visible=True, elem_classes="panel-container") as gen_settings_container:
+                            with gr.Tabs(selected='tab_options' if TURBO_MODE else 'tab_export'):
+                                with gr.Tab("Quality", id='tab_options', visible=TURBO_MODE):
+                                    gen_mode = gr.Radio(label=i18n.get('lbl_gen_mode'), choices=['Turbo', 'Fast', 'Standard'], value='Turbo')
+                                    decode_mode = gr.Radio(label='Decoding Mode', choices=['Low', 'Standard', 'High'], value='Standard')
+                                
+                                with gr.Tab("Advanced"):
+                                    with gr.Group():
+                                        with gr.Row():
+                                            check_box_rembg = gr.Checkbox(value=def_rembg, label=i18n.get('lbl_rembg'))
+                                            randomize_seed = gr.Checkbox(label="Randomize seed", value=True)
+                                        seed = gr.Slider(label=i18n.get('lbl_seed'), minimum=0, maximum=MAX_SEED, step=1, value=def_seed)
+                                        with gr.Row():
+                                            octree_resolution = gr.Slider(maximum=512, minimum=16, value=def_res, label=i18n.get('lbl_octree'), info="Higher = sharper geometry, more VRAM.")
+                                            num_chunks = gr.Slider(maximum=5000000, minimum=1000, value=def_chunks, label=i18n.get('lbl_chunks'), info="Memory management for large meshes.")
+                                            
+                                with gr.Tab("Texture"):
+                                     with gr.Group():
+                                        with gr.Row():
+                                            tex_steps = gr.Slider(maximum=100, minimum=1, value=def_tex_steps, step=1, label='Steps', info="Texture refinement steps.")
+                                            tex_guidance_scale = gr.Number(value=def_tex_cfg, label='Guidance', info="Texture prompt adherence.")
+                                        tex_seed = gr.Slider(label="Texture Seed", minimum=0, maximum=MAX_SEED, step=1, value=def_seed)
 
                 # Exposed Critical Parameters (Moved to Footer)
                 with gr.Group(elem_classes="footer-area"):

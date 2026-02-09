@@ -319,20 +319,21 @@ iframe {
 /* Prompt Container Standardization */
 .prompt-container {
     height: auto !important;
-    min-height: 200px !important;
-    flex: 1 1 auto !important; /* Allow growing to fill available tab space */
+    min-height: 100px !important;
+    flex: 0 1 auto !important; /* Allow shrinking */
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
     overflow: hidden !important;
-    padding: 4px !important;
+    padding: 0px !important;
+    margin-bottom: 8px !important;
 }
 
 /* Ensure images inside prompt container flex nicely */
 .prompt-container .gradio-image {
-    flex: 1 1 0% !important; /* Grow/Shrink to fill space */
+    flex: 0 0 auto !important; /* Fixed based on Python height param */
     min-height: 0 !important;
-    max-height: 100% !important; /* Never exceed container */
+    max-height: 400px !important; 
     object-fit: contain !important;
 }
 
