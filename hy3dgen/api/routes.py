@@ -26,10 +26,10 @@ async def map_request_to_params(req: JobRequest) -> dict:
         "negative_prompt": req.input.negative_prompt,
         "image": None, 
         "mv_images": None,
-        "num_inference_steps": req.quality or 30, # Handle quality object or int
-        "guidance_scale": 5.0,
+        "num_inference_steps": req.quality.steps if req.quality and req.quality.steps > 0 else 30,
+        "guidance_scale": req.quality.text_adherence * 10.0 if req.quality and req.quality.text_adherence > 0 else 5.0,
         "seed": req.quality.seed if req.quality else 0,
-        "octree_resolution": 256,
+        "octree_resolution": req.constraints.poly_budget.max_tris // 1000 if req.constraints and req.constraints.poly_budget else 256,
         "do_rembg": req.constraints.background == "remove" if req.constraints.background else True,
         "num_chunks": 8000,
         "do_texture": req.constraints.materials is not None,
@@ -37,19 +37,42 @@ async def map_request_to_params(req: JobRequest) -> dict:
         "tex_guidance_scale": 5.0,
         "tex_seed": 1234
     }
-    
-    # Fix quality.steps if it exists
-    if hasattr(req.quality, 'steps'):
-        params["num_inference_steps"] = req.quality.steps
+
+    # Handle octree resolution range
+    if params["octree_resolution"] < 128: params["octree_resolution"] = 128
+    if params["octree_resolution"] > 512: params["octree_resolution"] = 512
     
     if req.input.images:
-        primary = req.input.images[0]
-        try:
-            pil_img = await download_image_as_pil(primary.uri)
-            params["image"] = pil_img
-        except Exception as e:
-            print(f"Failed to load image {primary.uri}: {e}")
-            raise HTTPException(status_code=400, detail=f"Failed to load image: {e}")
+        mv_map = {
+            "orthographic_front": "front",
+            "orthographic_back": "back",
+            "orthographic_left": "left",
+            "orthographic_right": "right",
+            "reference": "front" # Fallback
+        }
+        
+        has_mv = any(img.role in mv_map and img.role != "reference" for img in req.input.images)
+        
+        if has_mv:
+            mv_images = {}
+            for img in req.input.images:
+                if img.role in mv_map:
+                    try:
+                        pil_img = await download_image_as_pil(img.uri)
+                        mv_images[mv_map[img.role]] = pil_img
+                    except Exception as e:
+                        print(f"Failed to load MV image {img.uri}: {e}")
+            params["mv_images"] = mv_images
+            params["model_key"] = "Multiview"
+        else:
+            # Single Image mode
+            primary = req.input.images[0]
+            try:
+                pil_img = await download_image_as_pil(primary.uri)
+                params["image"] = pil_img
+            except Exception as e:
+                print(f"Failed to load image {primary.uri}: {e}")
+                raise HTTPException(status_code=400, detail=f"Failed to load image: {e}")
     
     return params
 

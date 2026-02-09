@@ -161,7 +161,36 @@ class PlanExecutor:
                 raise TypeError(f"Unsupported imported mesh type: {type(loaded)}")
             return loaded
 
-        return self._generate_prompt_mesh(plan.prompt, plan.preset)
+        # Real Generation for Tauri sidecar
+        from hy3dgen.inference import InferencePipeline
+        import tempfile
+        import os
+        
+        # We need a temporary place to run the pipeline if it expects files, 
+        # but InferencePipeline.generate returns trimesh objects in memory now.
+        
+        # Minimal configuration for sidecar (one-off)
+        # Note: In single-shot mode, this will be slow due to model loading.
+        # Long-term, we should prefer the persistent API server.
+        pipeline = InferencePipeline(
+            model_path="tencent/Hunyuan3D-2",
+            tex_model_path="tencent/Hunyuan3D-2",
+            subfolder="hunyuan3d-dit-v2-0-turbo",
+            device="cuda" if torch.cuda.is_available() else "cpu",
+            enable_t2i=True,
+            enable_tex=True,
+            low_vram_mode=True
+        )
+        
+        gen_params = {
+            "text": plan.prompt,
+            "seed": plan.seed or 1234,
+            "num_inference_steps": 30,
+            "do_texture": "B" in [s.op_class for s in plan.steps if s.op_class]
+        }
+        
+        result = pipeline.generate("sidecar_gen", gen_params)
+        return result["mesh"]
 
     def _generate_prompt_mesh(self, prompt: str, preset: str) -> trimesh.Trimesh:
         p = (prompt or "").lower()

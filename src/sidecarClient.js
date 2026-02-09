@@ -1,6 +1,8 @@
 import { Command } from "@tauri-apps/plugin-shell";
 
 export async function callSidecar(request) {
+  console.log(`[Sidecar] Calling ${request.method} with params:`, request.params);
+  
   const command = Command.sidecar("python-backend", [
     "--method",
     request.method,
@@ -8,20 +10,31 @@ export async function callSidecar(request) {
     JSON.stringify(request.params || {}),
   ]);
 
-  const output = await command.execute();
-  if (output.code !== 0 && !output.stdout) {
-    throw new Error(output.stderr || `Sidecar failed with code ${output.code}`);
-  }
+  try {
+    const output = await command.execute();
+    console.log(`[Sidecar] Output code: ${output.code}`);
+    
+    if (output.code !== 0 && !output.stdout) {
+      console.error(`[Sidecar] Stderr: ${output.stderr}`);
+      throw new Error(output.stderr || `Sidecar failed with code ${output.code}`);
+    }
 
-  const lines = output.stdout.split(/\r?\n/).filter(Boolean);
-  if (lines.length === 0) {
-    throw new Error("Sidecar returned empty stdout");
-  }
+    const lines = output.stdout.split(/\r?\n/).filter(Boolean);
+    if (lines.length === 0) {
+      throw new Error("Sidecar returned empty stdout");
+    }
 
-  const parsed = JSON.parse(lines[lines.length - 1]);
-  if (!parsed.ok) {
-    throw new Error(parsed.error || "Unknown sidecar error");
-  }
+    const lastLine = lines[lines.length - 1];
+    console.log(`[Sidecar] Response: ${lastLine}`);
+    
+    const parsed = JSON.parse(lastLine);
+    if (!parsed.ok) {
+      throw new Error(parsed.error || "Unknown sidecar error");
+    }
 
-  return parsed.result;
+    return parsed.result;
+  } catch (err) {
+    console.error(`[Sidecar] Runtime Error:`, err);
+    throw err;
+  }
 }
