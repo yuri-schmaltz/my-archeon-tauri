@@ -7,6 +7,7 @@ gradio
 comfyui
 api
 blender
+tauri
 code
 studio
 ```

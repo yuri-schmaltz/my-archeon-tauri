@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Archeon Tauri</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      background: radial-gradient(circle at top, #16203a 0%, #0c1020 58%, #090d16 100%);
+      color: #d9e3ff;
+    }
+    .panel {
+      max-width: 920px;
+      margin: 0 auto;
+      background: rgba(10, 16, 35, 0.72);
+      border: 1px solid #2b3e6f;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+    button {
+      background: #3560ff;
+      color: white;
+      border: 0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    pre {
+      background: #0a1024;
+      border: 1px solid #2b3e6f;
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 220px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>My Archeon Tauri</h1>
+    <p>Smoke test for Python sidecar methods.</p>
+    <button id="btn-health">Check Sidecar Health</button>
+    <button id="btn-plan">Generate Vehicle Plan</button>
+    <pre id="out">Ready.</pre>
+  </div>
+
+  <script type="module">
+    import { callSidecar } from "./sidecarClient.js";
+
+    const out = document.getElementById("out");
+    const render = (value) => {
+      out.textContent = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+    };
+
+    document.getElementById("btn-health").addEventListener("click", async () => {
+      try {
+        const result = await callSidecar({ method: "health" });
+        render(result);
+      } catch (err) {
+        render(String(err));
+      }
+    });
+
+    document.getElementById("btn-plan").addEventListener("click", async () => {
+      try {
+        const result = await callSidecar({
+          method: "generate_plan",
+          params: {
+            prompt: "create a futuristic red sport car with rigged wheels",
+            preset: "vehicle_automotive"
+          }
+        });
+        render(result);
+      } catch (err) {
+        render(String(err));
+      }
+    });
+  </script>
+</body>
+</html>

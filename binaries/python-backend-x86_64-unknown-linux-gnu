@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Development launcher used by Tauri externalBin on Linux.
+# Production builds should overwrite this with PyInstaller output.
+exec python3 -m hy3dgen.sidecar.main "$@"

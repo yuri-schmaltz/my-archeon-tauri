@@ -1,0 +1,46 @@
+name: UI Visual Audit
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  ui-visual-audit:
+    name: UI Visual Audit (Blocking)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install UI audit dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy pillow requests fastapi uvicorn gradio trimesh platformdirs playwright
+
+      - name: Install Chromium for Playwright
+        run: |
+          python -m playwright install --with-deps chromium
+
+      - name: Run visual audit (fail on critical regressions)
+        run: |
+          python scripts/ui_visual_audit.py \
+            --out artifacts/ui_audit \
+            --fail-on-critical \
+            --delta-e-threshold 2.0 \
+            --json-summary artifacts/ui_audit/summary.json
+
+      - name: Upload UI audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-visual-audit
+          path: artifacts/ui_audit

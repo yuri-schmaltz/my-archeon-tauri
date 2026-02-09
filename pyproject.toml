@@ -41,7 +41,10 @@ docs = ["sphinx", "sphinx-rtd-theme", "furo", "myst-parser"]
 [project.scripts]
 hy3dgen-api = "hy3dgen.apps.api_server:main"
 hy3dgen-gui = "hy3dgen.apps.gradio_app:main"
+hy3dgen-sidecar = "hy3dgen.sidecar.main:main"
 
 [tool.setuptools]
-packages = ["hy3dgen"]
 include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["hy3dgen*"]

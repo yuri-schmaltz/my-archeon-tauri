@@ -224,6 +224,29 @@ cp build_scripts/Archeon3D.desktop ~/.local/share/applications/
 - **Session Persistence**: Automatically saves your last used settings (Seed, Steps, Guidance) so you can pick up where you left off.
 - **Linux Native**: Full support for Linux AppImage and native builds with `.desktop` integration.
 
+### Tauri Desktop + Python Sidecar (Experimental)
+
+This repository now includes an initial Tauri desktop scaffold and a Python sidecar bridge:
+
+- Tauri host: `src-tauri/`
+- Sidecar entrypoint: `hy3dgen/sidecar/main.py`
+- IR pipeline: `hy3dgen/agentic/` (`Planner`, `Executor`, `Validator`)
+
+Build the sidecar binary used by Tauri `externalBin`:
+
+```bash
+python scripts/build_sidecar.py
+```
+
+On Linux this produces `binaries/python-backend-x86_64-unknown-linux-gnu`, which is the filename Tauri expects during build.
+
+Sidecar supports:
+
+- `health`
+- `detect_runtime`
+- `generate_plan`
+- `execute_plan`
+
 
 
 ### API Server

@@ -1,5 +1,3 @@
-from pathlib import Path
-
 HTML_TEMPLATE_MODEL_VIEWER = """
 <!DOCTYPE html>
 <html lang="en">
@@ -10,14 +8,22 @@ HTML_TEMPLATE_MODEL_VIEWER = """
     <style>
         :root {
             --bg-app: #090B1F;
+            --surface-100: #1a1b26;
             --primary-500: #6366f1;
+            --primary-600: #4f46e5;
+            --focus-ring: #93a2ff;
             --text-error: #ef4444;
-            --bg-error: rgba(0,0,0,0.9);
+            --bg-error: rgba(0, 0, 0, 0.92);
             --font-family: ui-sans-serif, system-ui, sans-serif;
+            --space-4: 4px;
+            --space-8: 8px;
+            --space-12: 12px;
+            --radius-8: 8px;
         }
         body { 
             margin: 0; 
             background: var(--bg-app);
+            color: #d9e3ff;
             height: 100vh; 
             width: 100vw; 
             overflow: hidden; 
@@ -36,9 +42,9 @@ HTML_TEMPLATE_MODEL_VIEWER = """
             outline: none; 
         }
         model-viewer:focus-visible {
-            outline: 2px solid var(--primary-500);
-            outline-offset: 2px;
-            border-radius: 4px;
+            outline: 2px solid var(--focus-ring);
+            outline-offset: var(--space-4);
+            border-radius: var(--radius-8);
         }
         model-viewer::part(default-progress-bar) {
             height: 4px;
@@ -46,17 +52,22 @@ HTML_TEMPLATE_MODEL_VIEWER = """
         }
         #error-log {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: var(--space-8);
+            left: var(--space-8);
             color: var(--text-error);
             background: var(--bg-error);
-            padding: 12px;
-            border-radius: 6px;
+            padding: var(--space-12);
+            border-radius: var(--radius-8);
             display: none;
             z-index: 100;
-            font-size: 14px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            font-size: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.36);
             max-width: 90%;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            model-viewer {
+                transition: none !important;
+            }
         }
     </style>
 </head>
@@ -67,11 +78,15 @@ HTML_TEMPLATE_MODEL_VIEWER = """
                   aria-label="Interactive 3D model viewer. Use mouse or touch to rotate, zoom, and pan."
                   auto-rotate 
                   camera-controls 
+                  camera-target="auto auto auto"
+                  camera-orbit="0deg 75deg auto"
                   bounds="tight" 
                   min-field-of-view="10deg"
                   max-field-of-view="45deg"
+                  field-of-view="30deg"
                   interpolation-quality="high"
-                  shadow-intensity="1" 
+                  shadow-intensity="0.9" 
+                  environment-image="neutral"
                   exposure="1.0" 
                   tone-mapping="neutral"
                   ar
@@ -82,6 +97,11 @@ HTML_TEMPLATE_MODEL_VIEWER = """
     <script>
         const modelViewer = document.querySelector('model-viewer');
         const errorLog = document.getElementById('error-log');
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (prefersReducedMotion) {
+            modelViewer.autoRotate = false;
+        }
 
         modelViewer.addEventListener('error', (event) => {
             console.error("ModelViewer Error:", event);
@@ -94,15 +114,22 @@ HTML_TEMPLATE_MODEL_VIEWER = """
             const model = modelViewer.model;
             if (model && model.materials) {
                 model.materials.forEach(material => {
-                    // Fix for meshes that might appear black if baseColor is missing/invalid
-                    if (material.pbrMetallicRoughness && !material.pbrMetallicRoughness.baseColorTexture) {
+                    // Keep PBR defaults viewer-friendly to avoid very dark/black materials.
+                    if (material.pbrMetallicRoughness) {
                         material.pbrMetallicRoughness.setBaseColorFactor([1.0, 1.0, 1.0, 1.0]);
-                        material.pbrMetallicRoughness.setRoughnessFactor(0.5);
+                        material.pbrMetallicRoughness.setRoughnessFactor(0.9);
                         material.pbrMetallicRoughness.setMetallicFactor(0.0);
                     }
                     material.setDoubleSided(true);
                 });
             }
+
+            // Reframe camera after material updates for meshes with odd transforms.
+            if (typeof modelViewer.updateFraming === 'function') {
+                modelViewer.updateFraming();
+            }
+            modelViewer.cameraTarget = 'auto auto auto';
+            modelViewer.cameraOrbit = '0deg 75deg auto';
         });
         
         // Accessibility: Add keyboard visual focus helper if needed, 
@@ -127,18 +154,41 @@ CSS_STYLES = """
 /* AEGIS UI Reset */
 :root {
     --bg-app: #090B1F;
+    --bg-app-elevated: #0f1730;
     --primary-500: #6366f1;
+    --primary-600: #4f46e5;
+    --danger-500: #ef4444;
+    --danger-600: #dc2626;
     --surface-100: #1a1b26;
     --surface-200: #24283b;
+    --surface-300: #2f354d;
+    --text-strong: #e6ebff;
     --text-main: #c0caf5;
+    --text-muted: #9ca8d4;
+    --focus-ring: #93a2ff;
+    --space-4: 4px;
+    --space-8: 8px;
+    --space-12: 12px;
+    --space-16: 16px;
+    --space-24: 24px;
+    --space-32: 32px;
+    --radius-8: 8px;
+    --radius-12: 12px;
+    --control-height: 40px;
+    --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.28);
 }
 
-body, .gradio-container {
+*, *::before, *::after {
+    box-sizing: border-box !important;
+}
+
+html, body, .gradio-container {
     background-color: var(--bg-app) !important;
     color: var(--text-main) !important;
     margin: 0 !important;
     padding: 0 !important;
-    max-width: 100% !important;
+    width: 100% !important;
+    max-width: 100vw !important;
     height: 100vh !important;
     overflow-x: hidden !important; /* Prevent horizontal scrollbars */
     overflow-y: hidden !important; /* Prevent double scrollbars */
@@ -146,15 +196,15 @@ body, .gradio-container {
 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: var(--space-8);
+    height: var(--space-8);
 }
 ::-webkit-scrollbar-track {
     background: transparent;
 }
 ::-webkit-scrollbar-thumb {
     background: var(--surface-200);
-    border-radius: 3px;
+    border-radius: var(--radius-8);
 }
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary-500);
@@ -162,12 +212,66 @@ body, .gradio-container {
 
 /* Stop Button Styling */
 button.stop {
-    background-color: #ef4444 !important;
+    background-color: var(--danger-500) !important;
     color: white !important;
-    border: 1px solid #dc2626 !important;
+    border: 1px solid var(--danger-600) !important;
+    min-height: var(--control-height) !important;
+    border-radius: var(--radius-8) !important;
+    font-weight: 600 !important;
 }
 button.stop:hover {
-    background-color: #dc2626 !important;
+    background-color: var(--danger-600) !important;
+}
+
+/* Unified Controls (buttons/inputs/selects) */
+button,
+.gradio-container button,
+.gradio-container input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+.gradio-container textarea,
+.gradio-container select {
+    border-radius: var(--radius-8) !important;
+}
+
+button,
+.gradio-container button {
+    min-height: var(--control-height) !important;
+    padding-left: var(--space-16) !important;
+    padding-right: var(--space-16) !important;
+    box-shadow: none !important;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+button:hover,
+.gradio-container button:hover {
+    transform: translateY(-1px);
+}
+
+.gradio-container input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+.gradio-container textarea,
+.gradio-container select {
+    min-height: var(--control-height) !important;
+    border: 1px solid var(--surface-300) !important;
+    background: var(--bg-app-elevated) !important;
+    color: var(--text-strong) !important;
+}
+
+button:disabled,
+.gradio-container button:disabled,
+.gradio-container input:disabled,
+.gradio-container textarea:disabled,
+.gradio-container select:disabled {
+    opacity: 0.56 !important;
+    cursor: not-allowed !important;
+}
+
+button:focus-visible,
+.gradio-container button:focus-visible,
+.gradio-container input:focus-visible,
+.gradio-container textarea:focus-visible,
+.gradio-container select:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid var(--focus-ring) !important;
+    outline-offset: var(--space-4) !important;
 }
 
 /* Main Layout Fixes */
@@ -175,13 +279,37 @@ button.stop:hover {
 .main-row {
     height: calc(100vh - 60px) !important; 
     gap: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
     overflow: hidden !important; /* Block all outer scroll */
+}
+
+.main-row,
+.left-col,
+.right-col,
+.scroll-area,
+#gen_output_container,
+#model_3d_viewer,
+#model_3d_viewer iframe {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+}
+
+.left-col,
+.right-col,
+.panel-container,
+.prompt-container,
+.footer-area,
+.scroll-area,
+.tabs,
+.tab-nav {
+    min-width: 0 !important;
 }
 
 /* Left Column: converts to Flex Container to Dock Footer */
 .left-col {
     height: 100% !important;
-    padding: 16px !important;
+    padding: var(--space-16) !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important; /* No scroll on container itself */
@@ -189,7 +317,7 @@ button.stop:hover {
 
 .right-col {
     height: 100% !important;
-    padding: 16px !important;
+    padding: var(--space-16) !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
@@ -256,14 +384,14 @@ button.stop:hover {
     flex: 1 1 auto !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding-right: 8px !important; /* Space for scrollbar */
+    padding-right: var(--space-8) !important; /* Space for scrollbar */
     min-height: 0 !important; /* Firefox flex fix */
 }
 
 /* Footer Area: Doc at bottom */
 .footer-area {
     flex: 0 0 auto !important;
-    padding-top: 12px !important;
+    padding-top: var(--space-12) !important;
     border-top: 1px solid var(--surface-200) !important;
     background: var(--bg-app) !important;
     z-index: 50 !important;
@@ -273,9 +401,10 @@ button.stop:hover {
 .panel-container {
     background: var(--surface-100);
     border: 1px solid var(--surface-200);
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 12px;
+    border-radius: var(--radius-8);
+    padding: var(--space-12);
+    margin-bottom: var(--space-12);
+    box-shadow: var(--shadow-soft);
 }
 
 /* Compact Tabs */
@@ -284,6 +413,11 @@ button.stop:hover {
 }
 .tab-nav {
     border-bottom: 1px solid var(--surface-200) !important;
+}
+.tab-nav button {
+    min-height: var(--control-height) !important;
+    padding-left: var(--space-12) !important;
+    padding-right: var(--space-12) !important;
 }
 button.selected {
     border-bottom: 2px solid var(--primary-500) !important;
@@ -295,19 +429,20 @@ button.selected {
 iframe {
     width: 100% !important; 
     height: 100% !important; 
-    border-radius: 8px; 
+    border-radius: var(--radius-8); 
     background: #000;
 }
 
 /* Footer Polish */
 .footer-divider {
-    margin: 12px 0 !important;
+    margin: var(--space-12) 0 !important;
     border-color: var(--surface-200) !important;
 }
 .footer-text {
     text-align: center;
-    font-size: 0.8em;
+    font-size: 12px;
     opacity: 0.6;
+    color: var(--text-muted);
 }
 
 /* Input Compaction */
@@ -325,8 +460,8 @@ iframe {
     flex-direction: column !important;
     justify-content: center !important;
     overflow: hidden !important;
-    padding: 0px !important;
-    margin-bottom: 8px !important;
+    padding: 0 !important;
+    margin-bottom: var(--space-8) !important;
 }
 
 /* Ensure images inside prompt container flex nicely */
@@ -350,13 +485,13 @@ iframe {
     /* bottom: 0 !important; REMOVED */
     background: var(--bg-app) !important;
     z-index: 100 !important;
-    padding-top: 10px !important;
-    padding-bottom: 0px !important;
+    padding-top: var(--space-8) !important;
+    padding-bottom: 0 !important;
     border-top: 1px solid var(--surface-200) !important;
 }
 
 /* Fix "Missing Icon" squares in block labels */
-.block-label img, .block-title img {
+.block-label img, .block-title img, .block-label svg, .block-title svg, .block-label .icon {
     display: none !important;
 }
 
@@ -378,22 +513,23 @@ iframe {
 .empty-placeholder-icon svg {
     width: 64px;
     height: 64px;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-16);
 }
 .empty-placeholder-title {
-    font-size: 1.5em;
+    font-size: var(--space-24);
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-8);
+    color: var(--text-strong);
 }
 
 /* Custom Archeon Progress Bar */
 .archeon-progress-container {
     width: 100%;
-    margin-top: 8px; /* Space from viewer */
-    margin-bottom: 8px; /* Space from footer */
+    margin-top: var(--space-8); /* Space from viewer */
+    margin-bottom: var(--space-8); /* Space from footer */
     background: var(--surface-200);
-    border-radius: 4px;
-    height: 20px;
+    border-radius: var(--radius-8);
+    height: var(--space-24);
     position: relative;
     overflow: hidden;
 }
@@ -423,5 +559,65 @@ iframe {
     text-shadow: 0 1px 2px rgba(0,0,0,0.8);
     z-index: 10;
     pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+@media (max-width: 1024px) {
+    body, .gradio-container {
+        overflow-y: auto !important;
+    }
+
+    .main-row {
+        height: auto !important;
+        min-height: 100vh !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
+
+    .main-row > .column,
+    .main-row > div,
+    .left-col,
+    .right-col {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: 0 0 auto !important;
+        margin: 0 !important;
+        padding: var(--space-12) !important;
+    }
+
+    .scroll-area {
+        padding-right: var(--space-4) !important;
+    }
+
+    .footer-area {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: var(--space-8) !important;
+    }
+
+    .footer-area > * {
+        min-width: 0 !important;
+        flex: 1 1 100% !important;
+    }
+
+    .tab-nav {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .prompt-container .row.compact {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: var(--space-8) !important;
+    }
 }
 """
