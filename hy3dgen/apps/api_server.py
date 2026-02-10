@@ -183,6 +183,13 @@ def create_app(args=None):
     else:
         logger.warning(f"Frontend directory not found at {frontend_dir}")
 
+    # Serve Outputs
+    output_dir = os.path.join(project_root, "outputs")
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    app.mount("/outputs", StaticFiles(directory=output_dir), name="outputs")
+    logger.info(f"Serving outputs from {output_dir}")
+
     return app, args
 
 def main():

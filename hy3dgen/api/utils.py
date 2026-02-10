@@ -16,7 +16,13 @@ async def download_file(uri: str) -> bytes:
         async with httpx.AsyncClient() as client:
             resp = await client.get(uri, timeout=60.0)
             resp.raise_for_status()
+            resp.raise_for_status()
             return resp.content
+    elif parsed.scheme == 'data':
+        import base64
+        # data:image/png;base64,......
+        header, encoded = uri.split(",", 1)
+        return base64.b64decode(encoded)
     elif parsed.scheme == 'file' or not parsed.scheme:
         path = os.path.realpath(parsed.path)
         # Security: Prevent reading sensitive files outside the workspace
