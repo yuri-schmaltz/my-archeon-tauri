@@ -68,6 +68,24 @@ def create_app(args=None):
     async def lifespan(app: FastAPI):
         logger.info("Starting Worker Manager...")
         asyncio.create_task(request_manager.start())
+        
+        # Auto-open browser in a separate thread to avoid blocking or signals
+        def open_browser(url):
+            import time
+            import webbrowser
+            time.sleep(1.5) # Wait for server to bind
+            try:
+                logger.info(f"Opening browser at {url}")
+                webbrowser.open(url)
+            except Exception as e:
+                logger.warning(f"Failed to open browser: {e}")
+
+        import threading
+        url = f"http://{args.host}:{args.port}"
+        browser_thread = threading.Thread(target=open_browser, args=(url,))
+        browser_thread.daemon = True
+        browser_thread.start()
+        
         yield
         logger.info("Stopping Worker Manager...")
         await request_manager.stop()
@@ -148,6 +166,22 @@ def create_app(args=None):
                     status["models"].append({"id": repo.repo_id, "size": repo.size_on_disk})
         except: pass
         return status
+
+    
+    # 4. Mount Frontend (Static Files) & Auto-Open
+    from fastapi.staticfiles import StaticFiles
+    import os
+    
+    # Resolve path to src (root/src)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.abspath(os.path.join(current_dir, "../.."))
+    frontend_dir = os.path.join(project_root, "src")
+    
+    if os.path.exists(frontend_dir):
+        app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+        logger.info(f"Frontend served from {frontend_dir}")
+    else:
+        logger.warning(f"Frontend directory not found at {frontend_dir}")
 
     return app, args
 
