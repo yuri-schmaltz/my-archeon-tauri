@@ -1,8 +1,15 @@
-import { Command } from "@tauri-apps/plugin-shell";
-
 export async function callSidecar(request) {
   console.log(`[Sidecar] Calling ${request.method} with params:`, request.params);
-  
+
+  let Command;
+  try {
+    const shell = await import("@tauri-apps/plugin-shell");
+    Command = shell.Command;
+  } catch (e) {
+    console.warn("[Sidecar] Tauri plugin-shell not found, mocking response.");
+    return { artifacts: { mesh: "data/placeholder.glb" } };
+  }
+
   const command = Command.sidecar("python-backend", [
     "--method",
     request.method,
@@ -13,7 +20,7 @@ export async function callSidecar(request) {
   try {
     const output = await command.execute();
     console.log(`[Sidecar] Output code: ${output.code}`);
-    
+
     if (output.code !== 0 && !output.stdout) {
       console.error(`[Sidecar] Stderr: ${output.stderr}`);
       throw new Error(output.stderr || `Sidecar failed with code ${output.code}`);
@@ -26,7 +33,7 @@ export async function callSidecar(request) {
 
     const lastLine = lines[lines.length - 1];
     console.log(`[Sidecar] Response: ${lastLine}`);
-    
+
     const parsed = JSON.parse(lastLine);
     if (!parsed.ok) {
       throw new Error(parsed.error || "Unknown sidecar error");

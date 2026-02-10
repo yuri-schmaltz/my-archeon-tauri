@@ -72,7 +72,18 @@ def create_app(args=None):
         logger.info("Stopping Worker Manager...")
         await request_manager.stop()
     
+    from fastapi.middleware.cors import CORSMiddleware
+    
     app = FastAPI(title="Archeon 3D API", version="1.0.0", lifespan=lifespan)
+    
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    
     app.include_router(router)
 
     @app.get("/v1/system/monitor")
