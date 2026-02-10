@@ -192,7 +192,7 @@
     }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 12px;
     }
 
     .form-group label {
@@ -248,23 +248,19 @@
       justify-content: space-between;
     }
 
-    /* MultiView Grid */
-    .mv-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
     .image-upload-box {
       border: 2px dashed var(--surface-300);
       border-radius: var(--radius-8);
-      aspect-ratio: 1;
+      height: 180px;
+      /* Fixed height match input-section-fixed calculation */
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       overflow: hidden;
       position: relative;
+      background: var(--bg-app-elevated);
     }
 
     .image-upload-box img {
@@ -410,35 +406,35 @@
 
         <!-- MultiView Tab -->
         <div id="tab-multiview" class="content-tab" style="display: none;">
-          <div class="mv-grid">
-            <div class="form-group">
-              <label data-i18n="front">Front</label>
-              <div class="image-upload-box" onclick="triggerUpload('mv-front')">
-                <span id="mv-front-ph">📸</span>
+          <div class="mv-grid" style="grid-template-rows: 85px 85px; gap: 8px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <div class="image-upload-box small" onclick="triggerUpload('mv-front')"
+                style="height: 100%; border-radius: 6px;">
+                <span id="mv-front-ph" style="font-size: 1.2rem;">📸</span>
                 <img id="mv-front-preview" src="" style="display: none;">
               </div>
               <input type="file" id="mv-front" hidden onchange="handlePreview(this, 'mv-front-preview', 'mv-front-ph')">
             </div>
-            <div class="form-group">
-              <label data-i18n="back">Back</label>
-              <div class="image-upload-box" onclick="triggerUpload('mv-back')">
-                <span id="mv-back-ph">🔙</span>
+            <div class="form-group" style="margin-bottom: 0;">
+              <div class="image-upload-box small" onclick="triggerUpload('mv-back')"
+                style="height: 100%; border-radius: 6px;">
+                <span id="mv-back-ph" style="font-size: 1.2rem;">🔙</span>
                 <img id="mv-back-preview" src="" style="display: none;">
               </div>
               <input type="file" id="mv-back" hidden onchange="handlePreview(this, 'mv-back-preview', 'mv-back-ph')">
             </div>
-            <div class="form-group">
-              <label data-i18n="left">Left</label>
-              <div class="image-upload-box" onclick="triggerUpload('mv-left')">
-                <span id="mv-left-ph">⬅️</span>
+            <div class="form-group" style="margin-bottom: 0;">
+              <div class="image-upload-box small" onclick="triggerUpload('mv-left')"
+                style="height: 100%; border-radius: 6px;">
+                <span id="mv-left-ph" style="font-size: 1.2rem;">⬅️</span>
                 <img id="mv-left-preview" src="" style="display: none;">
               </div>
               <input type="file" id="mv-left" hidden onchange="handlePreview(this, 'mv-left-preview', 'mv-left-ph')">
             </div>
-            <div class="form-group">
-              <label data-i18n="right">Right</label>
-              <div class="image-upload-box" onclick="triggerUpload('mv-right')">
-                <span id="mv-right-ph">➡️</span>
+            <div class="form-group" style="margin-bottom: 0;">
+              <div class="image-upload-box small" onclick="triggerUpload('mv-right')"
+                style="height: 100%; border-radius: 6px;">
+                <span id="mv-right-ph" style="font-size: 1.2rem;">➡️</span>
                 <img id="mv-right-preview" src="" style="display: none;">
               </div>
               <input type="file" id="mv-right" hidden onchange="handlePreview(this, 'mv-right-preview', 'mv-right-ph')">
@@ -448,441 +444,450 @@
 
         <!-- Text Tab -->
         <div id="tab-text" class="content-tab" style="display: none;">
-          <div class="form-group">
+          <div class="form-group" style="margin-bottom: 8px;">
             <label data-i18n="prompt">Prompt</label>
-            <textarea id="text-prompt" rows="4" placeholder="Describe the object..."></textarea>
+            <textarea id="text-prompt" style="height: 110px; resize: none;"
+              placeholder="Describe the object..."></textarea>
           </div>
-          <div class="form-group">
+          <div class="form-group" style="margin-bottom: 0;">
             <label data-i18n="negative_prompt">Negative Prompt</label>
-            <textarea id="neg-prompt" rows="2" placeholder="Artifacts, low quality..."></textarea>
+            <textarea id="neg-prompt" style="height: 48px; resize: none;"
+              placeholder="Artifacts, low quality..."></textarea>
           </div>
         </div>
 
         <!-- Mesh Tab -->
         <div id="tab-mesh" class="content-tab" style="display: none;">
-          <div class="form-group">
-            <label data-i18n="mesh_source">Source Mesh (OBJ/GLB/BLEND)</label>
-            <div class="image-upload-box" onclick="triggerUpload('mesh-input')"
-              style="border-style: solid; background: var(--bg-app-elevated);">
-              <span id="mesh-placeholder">Select 3D File</span>
-              <span id="mesh-filename"
-                style="display: none; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 10px;"></span>
+          <div style="display: flex; gap: 12px; height: 180px;">
+            <div class="form-group" style="flex: 1; margin-bottom: 0; display: flex; flex-direction: column;">
+              <label data-i18n="mesh_source">Source Mesh</label>
+              <div class="image-upload-box" onclick="triggerUpload('mesh-input')"
+                style="border-style: solid; background: var(--bg-app-elevated); flex: 1; height: auto;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                  <span id="mesh-placeholder" style="font-size: 0.8rem; text-align: center;">Select 3D
+                    File<br>(OBJ/GLB)</span>
+                  <span id="mesh-filename"
+                    style="display: none; font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px;"></span>
+                </div>
+              </div>
+              <input type="file" id="mesh-input" hidden onchange="handleMeshSelect(this)">
             </div>
-            <input type="file" id="mesh-input" hidden onchange="handleMeshSelect(this)">
+
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+              <div
+                style="background: var(--bg-app-elevated); padding: 12px; border-radius: var(--radius-8); border: 1px solid var(--surface-300);">
+                <div class="form-group" style="margin-bottom: 8px;">
+                  <label style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem;">
+                    <input type="checkbox" id="op-decimate" checked style="width: auto;">
+                    <span data-i18n="mesh_decimate">Decimate</span>
+                  </label>
+                  <div style="margin-left: 20px; margin-top: 2px;">
+                    <input type="number" id="target-tris" value="20000" step="5000"
+                      style="font-size: 0.75rem; padding: 2px 6px;">
+                  </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 8px;">
+                  <label style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem;">
+                    <input type="checkbox" id="op-repair" checked style="width: auto;">
+                    <span data-i18n="mesh_repair">Repair</span>
+                  </label>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem;">
+                    <input type="checkbox" id="op-autotex" style="width: auto;">
+                    <span data-i18n="mesh_autotex">Auto-Texture</span>
+                  </label>
+                </div>
+              </div>
+
+              <button class="btn-generate"
+                style="margin-top: 0; background: #fbbf24; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3); padding: 8px; font-size: 0.8rem;"
+                onclick="processMesh()" data-i18n="btn_process_mesh">Process</button>
+            </div>
           </div>
 
-          <div
-            style="background: var(--bg-app-elevated); padding: 16px; border-radius: var(--radius-8); border: 1px solid var(--surface-300);">
-            <div class="form-group" style="margin-bottom: 12px;">
-              <label style="display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" id="op-decimate" checked style="width: auto;">
-                <span data-i18n="mesh_decimate">Decimate (Simplify)</span>
-              </label>
-              <div style="margin-left: 24px; margin-top: 4px;">
-                <input type="number" id="target-tris" value="20000" step="5000"
-                  style="font-size: 0.8rem; padding: 4px 8px;">
-                <span style="font-size: 0.7rem; color: var(--text-muted);" data-i18n="mesh_target_tris">Target
-                  Tris</span>
+          <!-- Shared Settings (Compacted) -->
+          <div style="border-top: 1px solid var(--surface-200); margin-top: 16px; padding-top: 16px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label data-i18n="steps">Steps</label>
+                <input type="number" id="steps" value="30" min="1" max="100">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label data-i18n="seed">Seed</label>
+                <input type="number" id="seed" value="42">
               </div>
             </div>
-            <div class="form-group" style="margin-bottom: 12px;">
-              <label style="display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" id="op-repair" checked style="width: auto;">
-                <span data-i18n="mesh_repair">Repair (Watertight)</span>
-              </label>
-            </div>
-            <div class="form-group" style="margin-bottom: 0;">
-              <label style="display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" id="op-autotex" style="width: auto;">
-                <span data-i18n="mesh_autotex">Auto-Texture</span>
+            <div class="form-group" style="margin-top: 12px; margin-bottom: 0;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="do-texture" checked style="width: auto;">
+                <span data-i18n="do_texture">Generate Texture</span>
               </label>
             </div>
           </div>
 
-          <button class="btn-generate"
-            style="margin-top: 16px; background: #fbbf24; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);"
-            onclick="processMesh()" data-i18n="btn_process_mesh">Process Mesh</button>
+          <button class="btn-generate" onclick="generate()" data-i18n="btn_generate">Generate 3D Model</button>
         </div>
+      </div>
 
-        <!-- Shared Settings -->
-        <div style="border-top: 1px solid var(--surface-200); margin-top: 32px; padding-top: 24px;">
-          <div class="form-group">
-            <label data-i18n="steps">Steps</label>
-            <input type="number" id="steps" value="30" min="1" max="100">
+      <div class="viewport">
+        <div class="viewer-controls">
+          <button id="ctrl-wireframe" class="ctrl-btn" title="Toggle Wireframe"
+            onclick="window.toggleWireframe()">🕸️</button>
+          <button id="ctrl-auto-rotate" class="ctrl-btn active" title="Toggle Auto-Rotate"
+            onclick="window.toggleAutoRotate()">🔄</button>
+          <button id="ctrl-exposure" class="ctrl-btn" title="Cycle Lighting"
+            onclick="window.cycleLighting()">💡</button>
+          <button id="ctrl-export" class="ctrl-btn" title="Export Model" onclick="window.showExportModal()">💾</button>
+        </div>
+        <div id="loader" class="loading-overlay">
+          <div class="spinner"></div>
+          <div id="loading-msg">Initializing Models...</div>
+        </div>
+        <model-viewer id="viewer" src="" camera-controls auto-rotate shadow-intensity="1" environment-image="neutral"
+          exposure="1.0">
+          <div slot="poster"
+            style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
+            Result model will appear here.
           </div>
-          <div class="form-group">
-            <label data-i18n="seed">Seed</label>
-            <input type="number" id="seed" value="42">
-          </div>
-          <div class="form-group">
-            <label style="display: flex; align-items: center; gap: 8px;">
-              <input type="checkbox" id="do-texture" checked style="width: auto;">
-              <span data-i18n="do_texture">Generate Texture</span>
-            </label>
+        </model-viewer>
+      </div>
+
+      <div class="sidebar-right">
+        <div style="padding: 16px; border-bottom: 1px solid var(--surface-200); font-weight: 600; font-size: 0.9rem;"
+          data-i18n="gallery_title">
+          Asset Gallery
+        </div>
+        <div id="gallery-list" style="flex: 1;">
+          <!-- Gallery items go here -->
+          <div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.8rem;">
+            No entries yet
           </div>
         </div>
-
-        <button class="btn-generate" onclick="generate()" data-i18n="btn_generate">Generate 3D Model</button>
       </div>
     </div>
 
-    <div class="viewport">
-      <div class="viewer-controls">
-        <button id="ctrl-wireframe" class="ctrl-btn" title="Toggle Wireframe"
-          onclick="window.toggleWireframe()">🕸️</button>
-        <button id="ctrl-auto-rotate" class="ctrl-btn active" title="Toggle Auto-Rotate"
-          onclick="window.toggleAutoRotate()">🔄</button>
-        <button id="ctrl-exposure" class="ctrl-btn" title="Cycle Lighting" onclick="window.cycleLighting()">💡</button>
-        <button id="ctrl-export" class="ctrl-btn" title="Export Model" onclick="window.showExportModal()">💾</button>
-      </div>
-      <div id="loader" class="loading-overlay">
-        <div class="spinner"></div>
-        <div id="loading-msg">Initializing Models...</div>
-      </div>
-      <model-viewer id="viewer" src="" camera-controls auto-rotate shadow-intensity="1" environment-image="neutral"
-        exposure="1.0">
-        <div slot="poster"
-          style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
-          Result model will appear here.
-        </div>
-      </model-viewer>
+    <div class="footer">
+      <div>Archeon v2.0 | Tauri Native</div>
+      <div id="api-status" data-i18n="api_status">API: Disconnected</div>
     </div>
 
-    <div class="sidebar-right">
-      <div style="padding: 16px; border-bottom: 1px solid var(--surface-200); font-weight: 600; font-size: 0.9rem;"
-        data-i18n="gallery_title">
-        Asset Gallery
-      </div>
-      <div id="gallery-list" style="flex: 1;">
-        <!-- Gallery items go here -->
-        <div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.8rem;">
-          No entries yet
-        </div>
-      </div>
-    </div>
-  </div>
+    <script type="module">
+      import { callSidecar } from "./sidecarClient.js";
 
-  <div class="footer">
-    <div>Archeon v2.0 | Tauri Native</div>
-    <div id="api-status" data-i18n="api_status">API: Disconnected</div>
-  </div>
+      window.switchTab = (tab) => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.content-tab').forEach(t => t.style.display = 'none');
 
-  <script type="module">
-    import { callSidecar } from "./sidecarClient.js";
+        const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText.toLowerCase().includes(tab));
+        if (activeBtn) activeBtn.classList.add('active');
+        document.getElementById(`tab-${tab}`).style.display = 'block';
+        window.activeTab = tab;
+      };
 
-    window.switchTab = (tab) => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.content-tab').forEach(t => t.style.display = 'none');
+      window.triggerUpload = (id) => document.getElementById(id).click();
 
-      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText.toLowerCase().includes(tab));
-      if (activeBtn) activeBtn.classList.add('active');
-      document.getElementById(`tab-${tab}`).style.display = 'block';
-      window.activeTab = tab;
-    };
-
-    window.triggerUpload = (id) => document.getElementById(id).click();
-
-    window.handlePreview = (input, imgId, phId) => {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          document.getElementById(imgId).src = e.target.result;
-          document.getElementById(imgId).style.display = 'block';
-          document.getElementById(phId).style.display = 'none';
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
-    };
-
-    window.addToHistory = async (entry) => {
-      try {
-        await fetch('http://localhost:8081/v1/history/add', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(entry)
-        });
-        window.refreshGallery();
-      } catch (err) { console.warn("Failed to add to history", err); }
-    };
-
-    window.generate = async () => {
-      const loader = document.getElementById('loader');
-      const msg = document.getElementById('loading-msg');
-      loader.style.display = 'flex';
-      msg.innerText = "Requesting Generation...";
-
-      try {
-        const params = {
-          steps: parseInt(document.getElementById('steps').value),
-          seed: parseInt(document.getElementById('seed').value),
-          do_texture: document.getElementById('do-texture').checked
-        };
-
-        let prompt = "Generate object";
-        if (window.activeTab === 'text') {
-          prompt = document.getElementById('text-prompt').value;
-          params.prompt = prompt;
-          params.neg_prompt = document.getElementById('neg-prompt').value;
+      window.handlePreview = (input, imgId, phId) => {
+        if (input.files && input.files[0]) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            document.getElementById(imgId).src = e.target.result;
+            document.getElementById(imgId).style.display = 'block';
+            document.getElementById(phId).style.display = 'none';
+          };
+          reader.readAsDataURL(input.files[0]);
         }
+      };
 
-        msg.innerText = "Processing (Loading models might take 20s)...";
-        const result = await callSidecar({
-          method: "execute_plan",
-          params: { prompt, seed: params.seed }
-        });
-
-        if (result && result.artifacts && result.artifacts.mesh) {
-          const path = result.artifacts.mesh;
-          document.getElementById('viewer').src = `tauri://localhost/${path}`;
-          window.addToHistory({ prompt, path, timestamp: new Date().toISOString() });
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Generation failed: " + err);
-      } finally {
-        loader.style.display = 'none';
-      }
-    };
-
-    window.handleMeshSelect = (input) => {
-      if (input.files && input.files[0]) {
-        const file = input.files[0];
-        document.getElementById('mesh-filename').innerText = file.name;
-        document.getElementById('mesh-filename').style.display = 'block';
-        document.getElementById('mesh-placeholder').style.display = 'none';
-        window.selectedMeshName = file.name;
-      }
-    };
-
-    window.processMesh = async () => {
-      const loader = document.getElementById('loader');
-      const msg = document.getElementById('loading-msg');
-
-      if (!window.selectedMeshName) {
-        alert("Please select a 3D file first.");
-        return;
-      }
-
-      loader.style.display = 'flex';
-      msg.innerText = "Analyzing Mesh...";
-
-      try {
-        const operations = [];
-        if (document.getElementById('op-decimate').checked) {
-          operations.push({
-            op_id: "decimate_1",
-            type: "decimate",
-            target: { mesh_id: "input_1" },
-            params: { target_tris: parseInt(document.getElementById('target-tris').value) }
+      window.addToHistory = async (entry) => {
+        try {
+          await fetch('http://localhost:8081/v1/history/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(entry)
           });
-        }
-        if (document.getElementById('op-repair').checked) {
-          operations.push({
-            op_id: "repair_1",
-            type: "cleanup",
-            target: { mesh_id: "input_1" },
-            params: { remove_degenerate_faces: true, remove_loose_parts: true }
-          });
-        }
-        if (document.getElementById('op-autotex').checked) {
-          operations.push({
-            op_id: "tex_1",
-            type: "auto_texture",
-            target: { mesh_id: "input_1" },
-            params: { steps: 30 }
-          });
-        }
+          window.refreshGallery();
+        } catch (err) { console.warn("Failed to add to history", err); }
+      };
 
-        const requestPayload = {
-          request_id: `meshop_${Date.now()}`,
-          mode: "mesh_ops",
-          input: {
-            source_meshes: [{
-              mesh_id: "input_1",
-              uri: window.selectedMeshName,
-              format: window.selectedMeshName.split('.').pop()
-            }]
-          },
-          operations: operations,
-          constraints: { target_formats: ["glb"] },
-          output: { artifact_prefix: "processed" }
-        };
+      window.generate = async () => {
+        const loader = document.getElementById('loader');
+        const msg = document.getElementById('loading-msg');
+        loader.style.display = 'flex';
+        msg.innerText = "Requesting Generation...";
 
-        msg.innerText = "Processing Mesh (Running Ops)...";
-        const result = await callSidecar({
-          method: "mesh_ops",
-          params: requestPayload
-        });
+        try {
+          const params = {
+            steps: parseInt(document.getElementById('steps').value),
+            seed: parseInt(document.getElementById('seed').value),
+            do_texture: document.getElementById('do-texture').checked
+          };
 
-        if (result && result.artifacts) {
-          const meshArtifact = result.artifacts.find(a => a.type === 'MESH');
-          if (meshArtifact) {
-            document.getElementById('viewer').src = `tauri://localhost/${meshArtifact.uri}`;
-            window.addToHistory({ prompt: `Processed: ${window.selectedMeshName}`, path: meshArtifact.uri, timestamp: new Date().toISOString() });
+          let prompt = "Generate object";
+          if (window.activeTab === 'text') {
+            prompt = document.getElementById('text-prompt').value;
+            params.prompt = prompt;
+            params.neg_prompt = document.getElementById('neg-prompt').value;
           }
+
+          msg.innerText = "Processing (Loading models might take 20s)...";
+          const result = await callSidecar({
+            method: "execute_plan",
+            params: { prompt, seed: params.seed }
+          });
+
+          if (result && result.artifacts && result.artifacts.mesh) {
+            const path = result.artifacts.mesh;
+            document.getElementById('viewer').src = `tauri://localhost/${path}`;
+            window.addToHistory({ prompt, path, timestamp: new Date().toISOString() });
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Generation failed: " + err);
+        } finally {
+          loader.style.display = 'none';
         }
-      } catch (err) {
-        console.error(err);
-        alert("Processing failed: " + err);
-      } finally {
-        loader.style.display = 'none';
-      }
-    };
+      };
 
-    window.updateMonitor = async () => {
-      const statusEl = document.getElementById('api-status');
-      const chipEl = document.getElementById('status-chip');
-      try {
-        const response = await fetch('http://localhost:8081/v1/system/monitor');
-        const data = await response.json();
-
-        statusEl.innerText = "API: Connected";
-        statusEl.style.color = "#10b981";
-        chipEl.style.background = "#10b98122";
-        chipEl.style.color = "#10b981";
-
-        if (data.gpu && data.gpu.vram) {
-          const used = (data.gpu.vram.allocated / (1024 ** 3)).toFixed(1);
-          const total = (data.gpu.vram.total / (1024 ** 3)).toFixed(1);
-          const pct = (data.gpu.vram.allocated / data.gpu.vram.total * 100).toFixed(0);
-          document.getElementById('vram-fill').style.width = `${pct}%`;
-          document.getElementById('vram-text').innerText = `${used}/${total} GB`;
+      window.handleMeshSelect = (input) => {
+        if (input.files && input.files[0]) {
+          const file = input.files[0];
+          document.getElementById('mesh-filename').innerText = file.name;
+          document.getElementById('mesh-filename').style.display = 'block';
+          document.getElementById('mesh-placeholder').style.display = 'none';
+          window.selectedMeshName = file.name;
         }
-      } catch (err) {
-        console.warn("Monitor fetch failed", err);
-        statusEl.innerText = "API: Disconnected";
-        statusEl.style.color = "#ef4444";
-        chipEl.style.background = "#ef444422";
-        chipEl.style.color = "#ef4444";
-      }
-    };
+      };
 
-    window.refreshGallery = async () => {
-      try {
-        const response = await fetch('http://localhost:8081/v1/history');
-        const data = await response.json();
-        const list = document.getElementById('gallery-list');
-        if (data.entries && data.entries.length > 0) {
-          list.innerHTML = data.entries.map(entry => `
+      window.processMesh = async () => {
+        const loader = document.getElementById('loader');
+        const msg = document.getElementById('loading-msg');
+
+        if (!window.selectedMeshName) {
+          alert("Please select a 3D file first.");
+          return;
+        }
+
+        loader.style.display = 'flex';
+        msg.innerText = "Analyzing Mesh...";
+
+        try {
+          const operations = [];
+          if (document.getElementById('op-decimate').checked) {
+            operations.push({
+              op_id: "decimate_1",
+              type: "decimate",
+              target: { mesh_id: "input_1" },
+              params: { target_tris: parseInt(document.getElementById('target-tris').value) }
+            });
+          }
+          if (document.getElementById('op-repair').checked) {
+            operations.push({
+              op_id: "repair_1",
+              type: "cleanup",
+              target: { mesh_id: "input_1" },
+              params: { remove_degenerate_faces: true, remove_loose_parts: true }
+            });
+          }
+          if (document.getElementById('op-autotex').checked) {
+            operations.push({
+              op_id: "tex_1",
+              type: "auto_texture",
+              target: { mesh_id: "input_1" },
+              params: { steps: 30 }
+            });
+          }
+
+          const requestPayload = {
+            request_id: `meshop_${Date.now()}`,
+            mode: "mesh_ops",
+            input: {
+              source_meshes: [{
+                mesh_id: "input_1",
+                uri: window.selectedMeshName,
+                format: window.selectedMeshName.split('.').pop()
+              }]
+            },
+            operations: operations,
+            constraints: { target_formats: ["glb"] },
+            output: { artifact_prefix: "processed" }
+          };
+
+          msg.innerText = "Processing Mesh (Running Ops)...";
+          const result = await callSidecar({
+            method: "mesh_ops",
+            params: requestPayload
+          });
+
+          if (result && result.artifacts) {
+            const meshArtifact = result.artifacts.find(a => a.type === 'MESH');
+            if (meshArtifact) {
+              document.getElementById('viewer').src = `tauri://localhost/${meshArtifact.uri}`;
+              window.addToHistory({ prompt: `Processed: ${window.selectedMeshName}`, path: meshArtifact.uri, timestamp: new Date().toISOString() });
+            }
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Processing failed: " + err);
+        } finally {
+          loader.style.display = 'none';
+        }
+      };
+
+      window.updateMonitor = async () => {
+        const statusEl = document.getElementById('api-status');
+        const chipEl = document.getElementById('status-chip');
+        try {
+          const response = await fetch('http://localhost:8081/v1/system/monitor');
+          const data = await response.json();
+
+          statusEl.innerText = "API: Connected";
+          statusEl.style.color = "#10b981";
+          chipEl.style.background = "#10b98122";
+          chipEl.style.color = "#10b981";
+
+          if (data.gpu && data.gpu.vram) {
+            const used = (data.gpu.vram.allocated / (1024 ** 3)).toFixed(1);
+            const total = (data.gpu.vram.total / (1024 ** 3)).toFixed(1);
+            const pct = (data.gpu.vram.allocated / data.gpu.vram.total * 100).toFixed(0);
+            document.getElementById('vram-fill').style.width = `${pct}%`;
+            document.getElementById('vram-text').innerText = `${used}/${total} GB`;
+          }
+        } catch (err) {
+          console.warn("Monitor fetch failed", err);
+          statusEl.innerText = "API: Disconnected";
+          statusEl.style.color = "#ef4444";
+          chipEl.style.background = "#ef444422";
+          chipEl.style.color = "#ef4444";
+        }
+      };
+
+      window.refreshGallery = async () => {
+        try {
+          const response = await fetch('http://localhost:8081/v1/history');
+          const data = await response.json();
+          const list = document.getElementById('gallery-list');
+          if (data.entries && data.entries.length > 0) {
+            list.innerHTML = data.entries.map(entry => `
             <div class="gallery-item" onclick="loadModel('${entry.path}')">
               <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${entry.prompt || 'Untitled'}</div>
               <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">${new Date(entry.timestamp).toLocaleString()}</div>
             </div>
           `).join('');
-        }
-      } catch (err) { console.warn("Gallery fetch failed", err); }
-    };
-
-    window.loadModel = (path) => {
-      document.getElementById('viewer').src = `tauri://localhost/${path}`;
-    };
-
-    window.translations = {};
-    window.currentLang = 'en';
-
-    window.setLanguage = async (lang) => {
-      window.currentLang = lang;
-      if (!Object.keys(window.translations).length) {
-        try {
-          const resp = await fetch('http://localhost:8081/v1/i18n');
-          window.translations = await resp.json();
-        } catch (err) { console.warn("Failed to fetch translations", err); return; }
-      }
-
-      const t = window.translations[lang] || window.translations['en'];
-      document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (t[key]) el.innerText = t[key];
-      });
-    };
-
-    window.toggleWireframe = () => {
-      const viewer = document.getElementById('viewer');
-      const btn = document.getElementById('ctrl-wireframe');
-      btn.classList.toggle('active');
-      const isWireframe = btn.classList.contains('active');
-
-      // Access three.js scene through model-viewer
-      if (viewer.model) {
-        viewer.model.materials.forEach(mat => {
-          // model-viewer materials are actually Three.js materials wrappers
-          // We can try to set wireframe if it exposes it, or use the Three.js object
-          try {
-            const threeMat = mat.getThreejsMaterial();
-            threeMat.wireframe = isWireframe;
-          } catch (e) { console.warn("Wireframe toggle not supported", e); }
-        });
-      }
-    };
-
-    window.toggleAutoRotate = () => {
-      const viewer = document.getElementById('viewer');
-      const btn = document.getElementById('ctrl-auto-rotate');
-      btn.classList.toggle('active');
-      viewer.autoRotate = btn.classList.contains('active');
-    };
-
-    window.cycleLighting = () => {
-      const viewer = document.getElementById('viewer');
-      const current = parseFloat(viewer.exposure);
-      viewer.exposure = current >= 2.0 ? 0.5 : current + 0.5;
-    };
-
-    window.showExportModal = () => {
-      document.getElementById('export-modal').style.display = 'flex';
-    };
-
-    window.closeModal = () => {
-      document.getElementById('export-modal').style.display = 'none';
-    };
-
-    window.exportModel = async (format) => {
-      window.closeModal();
-      const viewer = document.getElementById('viewer');
-      if (!viewer.src) { alert("No model to export!"); return; }
-
-      const loader = document.getElementById('loader');
-      const msg = document.getElementById('loading-msg');
-      loader.style.display = 'flex';
-      msg.innerText = `Exporting as ${format.toUpperCase()}...`;
-
-      try {
-        // Mocking advanced export via mesh_ops
-        const result = await callSidecar({
-          method: "mesh_ops",
-          params: {
-            mode: "mesh_ops",
-            input: { source_meshes: [{ mesh_id: "e1", uri: viewer.src.replace('tauri://localhost/', ''), format: 'glb' }] },
-            operations: [],
-            constraints: { target_formats: [format] }
           }
+        } catch (err) { console.warn("Gallery fetch failed", err); }
+      };
+
+      window.loadModel = (path) => {
+        document.getElementById('viewer').src = `tauri://localhost/${path}`;
+      };
+
+      window.translations = {};
+      window.currentLang = 'en';
+
+      window.setLanguage = async (lang) => {
+        window.currentLang = lang;
+        if (!Object.keys(window.translations).length) {
+          try {
+            const resp = await fetch('http://localhost:8081/v1/i18n');
+            window.translations = await resp.json();
+          } catch (err) { console.warn("Failed to fetch translations", err); return; }
+        }
+
+        const t = window.translations[lang] || window.translations['en'];
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const key = el.getAttribute('data-i18n');
+          if (t[key]) el.innerText = t[key];
         });
-        alert(`Exported to ${format.toUpperCase()} successfully!`);
-      } catch (err) { alert("Export failed: " + err); }
-      finally { loader.style.display = 'none'; }
-    };
+      };
 
-    window.updateDownloads = async () => {
-      try {
-        const resp = await fetch('http://localhost:8081/v1/system/downloads');
-        const data = await resp.json();
-        const mgr = document.getElementById('dl-manager');
-        if (data.active) {
-          mgr.style.display = 'flex';
-          document.getElementById('dl-progress').style.width = `${data.progress}%`;
-        } else { mgr.style.display = 'none'; }
-      } catch (e) { }
-    };
+      window.toggleWireframe = () => {
+        const viewer = document.getElementById('viewer');
+        const btn = document.getElementById('ctrl-wireframe');
+        btn.classList.toggle('active');
+        const isWireframe = btn.classList.contains('active');
 
-    setInterval(window.updateDownloads, 3000);
-    setInterval(window.updateMonitor, 5000);
-    setInterval(window.refreshGallery, 10000);
-    window.updateMonitor();
-    window.refreshGallery();
-    window.updateDownloads();
-    window.setLanguage('en');
-    window.activeTab = 'image';
-  </script>
+        // Access three.js scene through model-viewer
+        if (viewer.model) {
+          viewer.model.materials.forEach(mat => {
+            // model-viewer materials are actually Three.js materials wrappers
+            // We can try to set wireframe if it exposes it, or use the Three.js object
+            try {
+              const threeMat = mat.getThreejsMaterial();
+              threeMat.wireframe = isWireframe;
+            } catch (e) { console.warn("Wireframe toggle not supported", e); }
+          });
+        }
+      };
+
+      window.toggleAutoRotate = () => {
+        const viewer = document.getElementById('viewer');
+        const btn = document.getElementById('ctrl-auto-rotate');
+        btn.classList.toggle('active');
+        viewer.autoRotate = btn.classList.contains('active');
+      };
+
+      window.cycleLighting = () => {
+        const viewer = document.getElementById('viewer');
+        const current = parseFloat(viewer.exposure);
+        viewer.exposure = current >= 2.0 ? 0.5 : current + 0.5;
+      };
+
+      window.showExportModal = () => {
+        document.getElementById('export-modal').style.display = 'flex';
+      };
+
+      window.closeModal = () => {
+        document.getElementById('export-modal').style.display = 'none';
+      };
+
+      window.exportModel = async (format) => {
+        window.closeModal();
+        const viewer = document.getElementById('viewer');
+        if (!viewer.src) { alert("No model to export!"); return; }
+
+        const loader = document.getElementById('loader');
+        const msg = document.getElementById('loading-msg');
+        loader.style.display = 'flex';
+        msg.innerText = `Exporting as ${format.toUpperCase()}...`;
+
+        try {
+          // Mocking advanced export via mesh_ops
+          const result = await callSidecar({
+            method: "mesh_ops",
+            params: {
+              mode: "mesh_ops",
+              input: { source_meshes: [{ mesh_id: "e1", uri: viewer.src.replace('tauri://localhost/', ''), format: 'glb' }] },
+              operations: [],
+              constraints: { target_formats: [format] }
+            }
+          });
+          alert(`Exported to ${format.toUpperCase()} successfully!`);
+        } catch (err) { alert("Export failed: " + err); }
+        finally { loader.style.display = 'none'; }
+      };
+
+      window.updateDownloads = async () => {
+        try {
+          const resp = await fetch('http://localhost:8081/v1/system/downloads');
+          const data = await resp.json();
+          const mgr = document.getElementById('dl-manager');
+          if (data.active) {
+            mgr.style.display = 'flex';
+            document.getElementById('dl-progress').style.width = `${data.progress}%`;
+          } else { mgr.style.display = 'none'; }
+        } catch (e) { }
+      };
+
+      setInterval(window.updateDownloads, 3000);
+      setInterval(window.updateMonitor, 5000);
+      setInterval(window.refreshGallery, 10000);
+      window.updateMonitor();
+      window.refreshGallery();
+      window.updateDownloads();
+      window.setLanguage('en');
+      window.activeTab = 'image';
+    </script>
 </body>
 
 </html>
