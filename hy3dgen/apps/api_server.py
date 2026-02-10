@@ -72,9 +72,72 @@ def create_app(args=None):
         logger.info("Stopping Worker Manager...")
         await request_manager.stop()
     
-    # 4. Create App
     app = FastAPI(title="Archeon 3D API", version="1.0.0", lifespan=lifespan)
     app.include_router(router)
+
+    @app.get("/v1/system/monitor")
+    async def get_system_status():
+        import torch
+        status = {"gpu": {"available": torch.cuda.is_available()}}
+        if status["gpu"]["available"]:
+            status["gpu"]["vram"] = {
+                "total": torch.cuda.get_device_properties(0).total_memory,
+                "allocated": torch.cuda.memory_allocated(0),
+                "reserved": torch.cuda.memory_reserved(0),
+                "free": torch.cuda.get_device_properties(0).total_memory - torch.cuda.memory_reserved(0)
+            }
+        return status
+
+    @app.get("/v1/history")
+    async def get_history():
+        import json
+        import os
+        history_path = "/home/yurix/Documentos/my-archeon-tauri/data/history.json"
+        if os.path.exists(history_path):
+            with open(history_path, 'r') as f:
+                return json.load(f)
+        return {"entries": []}
+
+    @app.post("/v1/history/add")
+    async def add_history(entry: dict):
+        import json
+        import os
+        history_path = "/home/yurix/Documentos/my-archeon-tauri/data/history.json"
+        data = {"entries": []}
+        if os.path.exists(history_path):
+            try:
+                with open(history_path, 'r') as f:
+                    data = json.load(f)
+            except: pass
+        
+        entry["timestamp"] = entry.get("timestamp", __import__("datetime").datetime.now().isoformat())
+        data["entries"].unshift(entry) if hasattr(list, "unshift") else data["entries"].insert(0, entry)
+        
+        with open(history_path, 'w') as f:
+            json.dump(data, f, indent=2)
+        return {"status": "ok"}
+
+    @app.get("/v1/i18n")
+    async def get_i18n():
+        from hy3dgen.i18n import TRANSLATIONS
+        return TRANSLATIONS
+
+    @app.get("/v1/system/downloads")
+    async def get_downloads():
+        # In a real scenario, we'd hook into huggingface_hub callbacks.
+        # For now, we'll check if models exist and return a status.
+        import os
+        from huggingface_hub import scan_cache_dir
+        
+        status = {"active": False, "progress": 100, "models": []}
+        try:
+            cache = scan_cache_dir()
+            for repo in cache.repos:
+                if "Hunyuan3D" in repo.repo_id:
+                    status["models"].append({"id": repo.repo_id, "size": repo.size_on_disk})
+        except: pass
+        return status
+
     return app, args
 
 def main():

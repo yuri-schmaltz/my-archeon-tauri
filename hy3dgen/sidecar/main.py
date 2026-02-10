@@ -1,12 +1,6 @@
 from __future__ import annotations
 
-import argparse
-import json
-import logging
-import sys
-import tempfile
-from pathlib import Path
-from typing import Any, Dict
+import asyncio
 
 from hy3dgen.agentic import PlanExecutor, PlanIR, Planner, detect_runtime
 
@@ -26,7 +20,7 @@ def _json_error(req_id: Any, message: str) -> Dict[str, Any]:
     return {"id": req_id, "ok": False, "error": message}
 
 
-def handle_request(request: Dict[str, Any], planner: Planner, executor: PlanExecutor) -> Dict[str, Any]:
+async def handle_request(request: Dict[str, Any], planner: Planner, executor: PlanExecutor) -> Dict[str, Any]:
     req_id = request.get("id")
     method = request.get("method")
     params = request.get("params", {})
@@ -78,6 +72,15 @@ def handle_request(request: Dict[str, Any], planner: Planner, executor: PlanExec
             )
             result = exec_result.to_dict()
 
+        elif method == "mesh_ops":
+            from hy3dgen.meshops.engine import MeshOpsEngine
+            from hy3dgen.api.schemas import MeshOpsRequest
+            engine = MeshOpsEngine()
+            # Sidecar receives plain dict, we validate to MeshOpsRequest
+            ops_req = MeshOpsRequest.model_validate(params)
+            artifacts = await engine.process_async(ops_req)
+            result = {"artifacts": [a.model_dump() for a in artifacts]}
+
         else:
             return _json_error(req_id, f"Unknown method: {method}")
 
@@ -87,9 +90,22 @@ def handle_request(request: Dict[str, Any], planner: Planner, executor: PlanExec
         return _json_error(req_id, str(exc))
 
 
-def run_stdio(planner: Planner, executor: PlanExecutor) -> int:
-    for raw in sys.stdin:
-        line = raw.strip()
+async def run_stdio(planner: Planner, executor: PlanExecutor) -> int:
+    # Use a thread for blocking stdin read if necessary, but for JSONL it's usually fine
+    # with a simple loop if the processing itself is async.
+    # For Tauri, we want to be responsive.
+    
+    loop = asyncio.get_event_loop()
+    reader = asyncio.StreamReader()
+    protocol = asyncio.StreamReaderProtocol(reader)
+    await loop.connect_read_pipe(lambda: protocol, sys.stdin)
+
+    while True:
+        raw = await reader.readline()
+        if not raw:
+            break
+            
+        line = raw.decode().strip()
         if not line:
             continue
 
@@ -98,7 +114,7 @@ def run_stdio(planner: Planner, executor: PlanExecutor) -> int:
             if not isinstance(request, dict):
                 response = _json_error(None, "request must be a JSON object")
             else:
-                response = handle_request(request, planner, executor)
+                response = await handle_request(request, planner, executor)
         except json.JSONDecodeError as exc:
             response = _json_error(None, f"invalid json: {exc}")
 
@@ -108,7 +124,7 @@ def run_stdio(planner: Planner, executor: PlanExecutor) -> int:
     return 0
 
 
-def main() -> int:
+async def main_async() -> int:
     _configure_logging()
 
     parser = argparse.ArgumentParser(description="Archeon sidecar bridge")
@@ -138,7 +154,7 @@ def main() -> int:
             sys.stderr.write(f"Invalid --params: {exc}\n")
             return 2
 
-        response = handle_request(
+        response = await handle_request(
             {"id": "cli", "method": args.method, "params": params},
             planner,
             executor,
@@ -147,8 +163,15 @@ def main() -> int:
         return 0 if response.get("ok") else 1
 
     # Default to stdio mode so it can run directly as Tauri sidecar.
-    return run_stdio(planner, executor)
+    return await run_stdio(planner, executor)
+
+
+def main() -> int:
+    try:
+        return asyncio.run(main_async())
+    except KeyboardInterrupt:
+        return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())
