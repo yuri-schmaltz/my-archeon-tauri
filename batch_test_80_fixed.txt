@@ -1,0 +1,16 @@
+Script started...
+Parsing args...
+Args parsed.
+INFO:batch_tester:Starting batch processing via API: http://127.0.0.1:8081
+Searching for images in /home/yurix/Downloads/pins...
+Found 3906 images.
+INFO:batch_tester:Found 3906 images.
+Traceback (most recent call last):
+  File "/home/yurix/Documentos/my-archeon-tauri/batch_test.py", line 242, in <module>
+    main()
+  File "/home/yurix/Documentos/my-archeon-tauri/batch_test.py", line 65, in main
+    if any(img_output_dir.iterdir()):
+           ^^^^^^^^^^^^^^
+NameError: name 'img_output_dir' is not defined
+
+Fatal error: name 'img_output_dir' is not defined

@@ -5,8 +5,12 @@ import uuid
 import asyncio
 import traceback
 import os
+import trimesh
 from .utils import download_image_as_pil
 from hy3dgen.meshops.engine import MeshOpsEngine
+from hy3dgen.shapegen.utils import get_logger
+
+logger = get_logger("api_routes")
 
 router = APIRouter()
 
@@ -91,9 +95,16 @@ async def background_job_wrapper(job_id: str, params: Union[dict, MeshOpsRequest
         mgr = get_manager()
         result = await mgr.submit(params, uid=job_id)
         
-        mesh_path = None
-        if isinstance(result, (list, tuple)):
-            mesh_path = result[0]
+        if isinstance(result, dict) and "textured_mesh" in result:
+            mesh_to_save = result["textured_mesh"] or result["mesh"]
+            
+            output_dir = "outputs"
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+                
+            mesh_path = os.path.join(output_dir, f"{job_id}.glb")
+            mesh_to_save.export(mesh_path)
+            logger.info(f"[{job_id}] Saved artifact to {mesh_path}")
         else:
             mesh_path = str(result)
             
@@ -104,9 +115,9 @@ async def background_job_wrapper(job_id: str, params: Union[dict, MeshOpsRequest
              artifacts.append(Artifact(
                 type=ArtifactType.MESH,
                 format="glb" if mesh_path.endswith(".glb") else "obj",
-                uri=mesh_path,
+                uri=os.path.abspath(mesh_path),
                 metadata={
-                    "path": mesh_path 
+                    "path": os.path.abspath(mesh_path) 
                 }
             ))
 

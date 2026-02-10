@@ -62,14 +62,17 @@ def main():
     fail_count = 0
     
     for i, img_path in enumerate(image_files):
-        logger.info(f"[{i+1}/{len(image_files)}] Processing {img_path.name}...")
-        
         # Prepare output directory
         base_name = img_path.stem
         safe_name = "".join([c if c.isalnum() else "_" for c in base_name])
         img_output_dir = output_root / safe_name
         img_output_dir.mkdir(exist_ok=True)
-        
+
+        if any(img_output_dir.iterdir()):
+            print(f"[{i+1}/{len(image_files)}] Skipping {img_path.name}: Output exists.", flush=True)
+            continue
+
+        logger.info(f"[{i+1}/{len(image_files)}] Processing {img_path.name}...")
         try:
             # 3a. Read Image as Base64 (Data URI)
             with open(img_path, "rb") as f:
@@ -155,14 +158,14 @@ def main():
             # 3c. Poll for Completion
             while True:
                 try:
-                    poll_resp = httpx.get(f"{args.api_url}/v1/jobs/{job_id}", timeout=10.0)
+                    poll_resp = httpx.get(f"{args.api_url}/v1/jobs/{job_id}", timeout=60.0)
                     status_data = poll_resp.json()
                 except Exception as poll_err:
                     logger.warning(f"Poll failed: {poll_err}")
                     time.sleep(1)
                     continue
 
-                status = status_data["status"]
+                status = status_data["status"].upper()
                 
                 if status == "COMPLETED":
                     duration = time.time() - t0
