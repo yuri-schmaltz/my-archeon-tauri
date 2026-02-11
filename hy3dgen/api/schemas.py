@@ -211,12 +211,16 @@ class ErrorObject(BaseModel):
     retryable: bool
 
 class JobResponse(BaseModel):
-    request_id: str
+    request_id: str = Field(..., validation_alias=AliasChoices("request_id", "job_id"))
     schema_version: str = "1.0"
     status: JobStatus
     artifacts: List[Artifact] = Field(default_factory=list)
     quality_report: Optional[Dict[str, Any]] = None
     error: Optional[ErrorObject] = None
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 # --- MeshOps Specific Models (Now safe to define) ---

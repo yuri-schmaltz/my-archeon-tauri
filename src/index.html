@@ -574,7 +574,7 @@
   </div>
 
   <script type="module">
-    import { callSidecar } from "./sidecarClient.js";
+    import { callSidecar } from "./sidecarClient.js?v=3.1";
 
     window.switchTab = (tab) => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -602,7 +602,7 @@
 
     window.addToHistory = async (entry) => {
       try {
-        await fetch('http://localhost:8081/v1/history/add', {
+        await fetch('/v1/history/add', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(entry)
@@ -785,7 +785,7 @@
       const statusEl = document.getElementById('api-status');
       const chipEl = document.getElementById('status-chip');
       try {
-        const response = await fetch('http://localhost:8081/v1/system/monitor');
+        const response = await fetch('/v1/system/monitor');
         const data = await response.json();
 
         statusEl.innerText = "API: Connected";
@@ -811,7 +811,7 @@
 
     window.refreshGallery = async () => {
       try {
-        const response = await fetch('http://localhost:8081/v1/history');
+        const response = await fetch('/v1/history');
         const data = await response.json();
         const list = document.getElementById('gallery-list');
         if (data.entries && data.entries.length > 0) {
@@ -836,7 +836,7 @@
       window.currentLang = lang;
       if (!Object.keys(window.translations).length) {
         try {
-          const resp = await fetch('http://localhost:8081/v1/i18n');
+          const resp = await fetch('/v1/i18n');
           window.translations = await resp.json();
         } catch (err) { console.warn("Failed to fetch translations", err); return; }
       }
@@ -916,7 +916,7 @@
 
     window.updateDownloads = async () => {
       try {
-        const resp = await fetch('http://localhost:8081/v1/system/downloads');
+        const resp = await fetch('/v1/system/downloads');
         const data = await resp.json();
         const mgr = document.getElementById('dl-manager');
         if (data.active) {
